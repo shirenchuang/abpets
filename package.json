@@ -1,7 +1,7 @@
 {
   "name": "abpets",
   "version": "0.1.0",
-  "description": "Install AgentBro pets into ~/.codex/pets and ~/.agentbro/pets. Companion CLI for the agentbro.net pet community.",
+  "description": "Install desktop pets for AI coding agents — Claude Code, Codex, Cursor, GitHub Copilot, Cline, Gemini. One command extracts a pet's spritesheet into ~/.codex/pets and ~/.agentbro/pets so any AgentBro-hosted agent picks it up.",
   "type": "module",
   "bin": {
     "abpets": "bin/abpets.mjs"
@@ -17,14 +17,39 @@
   },
   "keywords": [
     "agentbro",
+    "ai-agent",
+    "ai-coding",
+    "claude-code",
+    "claude",
     "codex",
+    "codex-desktop",
+    "cursor",
+    "github-copilot",
+    "copilot",
+    "cline",
+    "gemini-cli",
+    "desktop-pet",
+    "virtual-pet",
+    "mascot",
+    "pixel-art",
+    "spritesheet",
+    "sprite",
     "pets",
-    "cli"
+    "cli",
+    "marketplace",
+    "macos"
   ],
   "homepage": "https://www.agentbro.net/pets",
+  "bugs": {
+    "url": "https://github.com/shirenchuang/abpets/issues"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/shirenchuang/abpets.git"
+    "url": "git+https://github.com/shirenchuang/abpets.git"
+  },
+  "author": {
+    "name": "shirenchuang",
+    "url": "https://github.com/shirenchuang"
   },
   "license": "MIT",
   "scripts": {
