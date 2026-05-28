@@ -1,0 +1,34 @@
+{
+  "name": "abpets",
+  "version": "0.1.0",
+  "description": "Install AgentBro pets into ~/.codex/pets and ~/.agentbro/pets. Companion CLI for the agentbro.net pet community.",
+  "type": "module",
+  "bin": {
+    "abpets": "bin/abpets.mjs"
+  },
+  "files": [
+    "bin",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "agentbro",
+    "codex",
+    "pets",
+    "cli"
+  ],
+  "homepage": "https://www.agentbro.net/pets",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shirenchuang/abpets.git"
+  },
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test test/*.test.mjs || true",
+    "smoke": "ABPETS_API=http://localhost:8787 node bin/abpets.mjs search '' && echo ok"
+  }
+}
