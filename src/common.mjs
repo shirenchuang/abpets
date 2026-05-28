@@ -59,3 +59,26 @@ export function ensureSlug(slug) {
     throw new Error(`invalid slug "${slug}" — expected lowercase letters / numbers / dashes, 2–41 chars`)
   }
 }
+
+// Parse "alice/luffy" → { handle, slug } or "luffy" → { handle: null, slug }.
+// Throws if the format is structurally invalid (e.g. multiple slashes, empty
+// segment). The handle character class matches GitHub login rules.
+export function parsePetRef(ref) {
+  if (typeof ref !== 'string' || !ref) {
+    throw new Error('missing pet reference')
+  }
+  const parts = ref.split('/')
+  if (parts.length === 1) {
+    ensureSlug(parts[0])
+    return { handle: null, slug: parts[0] }
+  }
+  if (parts.length === 2) {
+    const [handle, slug] = parts
+    if (!/^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,38})$/.test(handle)) {
+      throw new Error(`invalid handle "${handle}"`)
+    }
+    ensureSlug(slug)
+    return { handle, slug }
+  }
+  throw new Error(`invalid pet reference "${ref}" — expected <handle>/<slug> or <slug>`)
+}

@@ -1,12 +1,16 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { c, ensureSlug, TARGET_DIRS } from './common.mjs'
+import { c, parsePetRef, TARGET_DIRS } from './common.mjs'
 
 const ROOT_LABELS = ['codex', 'agentbro']
 
-export function runUninstall([slug]) {
-  if (!slug) { console.error('abpets uninstall: missing <slug>'); return 1 }
-  ensureSlug(slug)
+// Local pets are keyed by slug only (no handle in the path). Accept both
+// `abpets uninstall luffy` and `abpets uninstall alice/luffy`; the handle is
+// accepted but otherwise ignored — we wouldn't know which one to keep anyway,
+// since on disk there's only ever one entry per slug.
+export function runUninstall([ref]) {
+  if (!ref) { console.error('abpets uninstall: missing <handle/slug> or <slug>'); return 1 }
+  const { slug } = parsePetRef(ref)
 
   let removed = 0
   TARGET_DIRS.forEach((root, idx) => {

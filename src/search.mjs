@@ -35,11 +35,12 @@ export async function runSearch([query = '']) {
   for (const p of hits) {
     const tags = (p.tags || []).slice(0, 3).map((t) => c.cyan(t)).join(' ')
     const dl = p.downloadCount ? c.dim(`  ${p.downloadCount}↓`) : ''
-    console.log(`  ${c.bold(p.displayName)}  ${c.dim('/' + p.slug)}${dl}`)
+    const fullSlug = p.fullSlug ?? `${p.authorHandle}/${p.slug}`
+    console.log(`  ${c.bold(p.displayName)}  ${c.dim(fullSlug)}${dl}`)
     if (p.description) console.log(`    ${c.dim(p.description.length > 88 ? p.description.slice(0, 88) + '…' : p.description)}`)
     const meta = [`by @${p.authorHandle}`, tags].filter(Boolean).join('  ')
     if (meta) console.log(`    ${c.dim(meta)}`)
-    console.log(`    ${c.green('abpets install ' + p.slug)}`)
+    console.log(`    ${c.green('abpets install ' + fullSlug)}`)
     console.log()
   }
   return 0
