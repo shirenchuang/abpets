@@ -1,4 +1,4 @@
-import { c, DEFAULT_API, API_BASE } from './common.mjs'
+import { c, DEFAULT_API, API_BASE, DEFAULT_WEB, WEB_BASE } from './common.mjs'
 
 export function printUsage() {
   const lines = [
@@ -11,12 +11,18 @@ export function printUsage() {
     `    abpets list                    list locally installed pets`,
     `    abpets uninstall <slug>        remove a pet from your machine`,
     `    abpets search [query]          search the community for pets`,
+    `    abpets login                   sign in with GitHub for submissions`,
+    `    abpets whoami                  show the signed-in account`,
+    `    abpets logout                  remove the local CLI session`,
+    `    abpets submit <path>           submit a local pet folder for review`,
     `    abpets help                    show this help`,
     '',
     `  ${c.cyan('Examples')}`,
     `    abpets install shirenchuang/luffy`,
     `    abpets install luffy             # works if only one luffy exists`,
     `    abpets search pirate`,
+    `    abpets login`,
+    `    abpets submit ~/.codex/pets/my-pet`,
     '',
     `  ${c.cyan('Where pets land')}`,
     `    ~/.codex/pets/<slug>/`,
@@ -26,6 +32,9 @@ export function printUsage() {
     `    ABPETS_API   API base URL`,
     `                 default: ${DEFAULT_API}`,
     `                 current: ${API_BASE}`,
+    `    ABPETS_WEB   Website base URL for login and links`,
+    `                 default: ${DEFAULT_WEB}`,
+    `                 current: ${WEB_BASE}`,
     '',
   ]
   console.log(lines.join('\n'))

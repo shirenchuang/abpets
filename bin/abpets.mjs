@@ -6,6 +6,8 @@
 //   abpets list
 //   abpets uninstall <slug>
 //   abpets search [query]
+//   abpets login
+//   abpets submit <path>
 //
 // API base resolution: $ABPETS_API > built-in production URL.
 
@@ -13,6 +15,8 @@ import { runInstall } from '../src/install.mjs'
 import { runList } from '../src/list.mjs'
 import { runUninstall } from '../src/uninstall.mjs'
 import { runSearch } from '../src/search.mjs'
+import { runLogin, runLogout, runWhoami } from '../src/auth.mjs'
+import { runSubmit } from '../src/submit.mjs'
 import { printUsage } from '../src/usage.mjs'
 
 const [, , cmd, ...rest] = process.argv
@@ -23,6 +27,10 @@ const dispatch = {
   uninstall: runUninstall,
   remove: runUninstall, // alias
   search: runSearch,
+  login: runLogin,
+  logout: runLogout,
+  whoami: runWhoami,
+  submit: runSubmit,
   help: () => { printUsage(); return 0 },
   '--help': () => { printUsage(); return 0 },
   '-h': () => { printUsage(); return 0 },
