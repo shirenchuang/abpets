@@ -1,5 +1,11 @@
 # abpets
 
+[![npm version](https://img.shields.io/npm/v/abpets?color=22c55e&logo=npm)](https://www.npmjs.com/package/abpets)
+[![npm downloads](https://img.shields.io/npm/dm/abpets?color=22c55e)](https://www.npmjs.com/package/abpets)
+[![node](https://img.shields.io/node/v/abpets?color=339933&logo=node.js)](https://nodejs.org)
+[![license](https://img.shields.io/github/license/shirenchuang/abpets?color=blue)](LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/shirenchuang/abpets?style=social)](https://github.com/shirenchuang/abpets)
+
 > Install community pets for [AgentBro](https://www.agentbro.net) and [Codex Desktop](https://github.com/openai/codex) — one command, no config.
 
 ```bash
