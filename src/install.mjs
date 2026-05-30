@@ -15,6 +15,41 @@ function safeJoin(targetDir, entryName) {
   return resolved
 }
 
+async function fetchBytes(url, label) {
+  const res = await fetch(url)
+  if (!res.ok) throw new Error(`${label} download failed: ${res.status} ${res.statusText}`)
+  return Buffer.from(await res.arrayBuffer())
+}
+
+function spritesheetNameFrom(pet, petJson) {
+  const fromJson = path.basename(String(petJson.spritesheetPath || ''))
+  if (fromJson) return fromJson
+
+  try {
+    const fromUrl = path.basename(new URL(pet.spritesheetUrl).pathname)
+    if (fromUrl) return fromUrl
+  } catch {}
+
+  const format = pet.format === 'png' ? 'png' : 'webp'
+  return `spritesheet.${format}`
+}
+
+function writeFiles(slug, files) {
+  const wroteEach = []
+  for (const dir of TARGET_DIRS) {
+    const petDir = path.join(dir, slug)
+    fs.mkdirSync(petDir, { recursive: true })
+
+    for (const [name, data] of files) {
+      const dest = safeJoin(petDir, name)
+      fs.mkdirSync(path.dirname(dest), { recursive: true })
+      fs.writeFileSync(dest, data)
+    }
+    wroteEach.push(petDir)
+  }
+  return wroteEach
+}
+
 // When the user passes a bare slug (no handle), search the manifest for
 // candidates and disambiguate. With per-author uniqueness, "luffy" might match
 // alice/luffy AND bob/luffy — refuse to guess and ask the user to specify.
@@ -50,42 +85,49 @@ export async function runInstall([ref]) {
   if (pet.status !== 'approved') {
     throw new Error(`pet "${handle}/${slug}" is ${pet.status}, not approved — can't install`)
   }
-  if (!pet.zipUrl) {
-    throw new Error(`pet "${handle}/${slug}" has no .zip yet — ask the maintainer to rebuild it`)
-  }
 
-  console.log(`${c.dim('→')} fetching ${c.cyan(pet.zipUrl)}`)
-  const res = await fetch(pet.zipUrl)
-  if (!res.ok) throw new Error(`download failed: ${res.status} ${res.statusText}`)
-  const buf = Buffer.from(await res.arrayBuffer())
-  console.log(`${c.dim('→')} downloaded ${c.bold((buf.length / 1024).toFixed(1) + ' KB')}`)
-
-  const entries = parseZip(buf)
-  if (entries.length === 0) throw new Error('zip is empty')
-
-  // Pet zips wrap files in a top-level <slug>/ folder. We strip that prefix
-  // when extracting so the files land directly under ~/.codex/pets/<slug>/.
-  // If the zip happens to be flat (no folder), we just write each entry verbatim.
-  const stripPrefix = entries.every((e) => e.name.startsWith(`${slug}/`)) ? `${slug}/` : ''
-
-  // Local layout: ~/.codex/pets/<slug>/ — we deliberately do NOT include the
-  // handle. Codex Desktop and AgentBro both key by slug; the handle is a server
-  // identity for collision-free publishing, not part of the on-disk address.
   let wroteEach = []
-  for (const dir of TARGET_DIRS) {
-    const petDir = path.join(dir, slug)
-    fs.mkdirSync(petDir, { recursive: true })
+  if (pet.zipUrl) {
+    console.log(`${c.dim('→')} fetching ${c.cyan(pet.zipUrl)}`)
+    const buf = await fetchBytes(pet.zipUrl, 'zip')
+    console.log(`${c.dim('→')} downloaded ${c.bold((buf.length / 1024).toFixed(1) + ' KB')}`)
 
+    const entries = parseZip(buf)
+    if (entries.length === 0) throw new Error('zip is empty')
+
+    // Pet zips wrap files in a top-level <slug>/ folder. We strip that prefix
+    // when extracting so the files land directly under ~/.codex/pets/<slug>/.
+    // If the zip happens to be flat (no folder), we just write each entry verbatim.
+    const stripPrefix = entries.every((e) => e.name.startsWith(`${slug}/`)) ? `${slug}/` : ''
+
+    const files = []
     for (const entry of entries) {
       // Skip the folder entries themselves (zip "directories" end in /).
       if (entry.name.endsWith('/')) continue
       const rel = stripPrefix ? entry.name.slice(stripPrefix.length) : entry.name
       if (!rel) continue
-      const dest = safeJoin(petDir, rel)
-      fs.mkdirSync(path.dirname(dest), { recursive: true })
-      fs.writeFileSync(dest, entry.data)
+      files.push([rel, entry.data])
     }
-    wroteEach.push(petDir)
+    wroteEach = writeFiles(slug, files)
+  } else if (pet.petJsonUrl && pet.spritesheetUrl) {
+    console.log(`${c.dim('→')} fetching ${c.cyan(pet.petJsonUrl)}`)
+    console.log(`${c.dim('→')} fetching ${c.cyan(pet.spritesheetUrl)}`)
+    const [petJsonBytes, sheetBytes] = await Promise.all([
+      fetchBytes(pet.petJsonUrl, 'pet.json'),
+      fetchBytes(pet.spritesheetUrl, 'spritesheet'),
+    ])
+    const petJson = JSON.parse(petJsonBytes.toString('utf8'))
+    const sheetName = spritesheetNameFrom(pet, petJson)
+    petJson.spritesheetPath = sheetName
+    const normalizedJson = Buffer.from(JSON.stringify(petJson, null, 2) + '\n')
+    const totalKb = ((normalizedJson.length + sheetBytes.length) / 1024).toFixed(1)
+    console.log(`${c.dim('→')} downloaded ${c.bold(totalKb + ' KB')}`)
+    wroteEach = writeFiles(slug, [
+      ['pet.json', normalizedJson],
+      [sheetName, sheetBytes],
+    ])
+  } else {
+    throw new Error(`pet "${handle}/${slug}" has no installable assets`)
   }
 
   // Best-effort download counter ping; never fails the install.
