@@ -11,6 +11,7 @@
 //
 // API base resolution: $ABPETS_API > built-in production URL.
 
+import { spawnSync } from 'node:child_process'
 import { runInstall } from '../src/install.mjs'
 import { runList } from '../src/list.mjs'
 import { runUninstall } from '../src/uninstall.mjs'
@@ -20,6 +21,38 @@ import { runSubmit } from '../src/submit.mjs'
 import { printUsage } from '../src/usage.mjs'
 
 const [, , cmd, ...rest] = process.argv
+const NETWORK_COMMANDS = new Set(['install', 'search', 'login', 'logout', 'whoami', 'submit'])
+
+function hasProxyEnv() {
+  return Boolean(
+    process.env.HTTPS_PROXY ||
+    process.env.https_proxy ||
+    process.env.HTTP_PROXY ||
+    process.env.http_proxy ||
+    process.env.ALL_PROXY ||
+    process.env.all_proxy
+  )
+}
+
+if (
+  NETWORK_COMMANDS.has(cmd) &&
+  hasProxyEnv() &&
+  !process.env.NODE_USE_ENV_PROXY &&
+  !process.env.ABPETS_PROXY_BOOTSTRAPPED &&
+  process.allowedNodeEnvironmentFlags?.has('--use-env-proxy')
+) {
+  const child = spawnSync(process.execPath, process.argv.slice(1), {
+    stdio: 'inherit',
+    env: {
+      ...process.env,
+      NODE_USE_ENV_PROXY: '1',
+      ABPETS_PROXY_BOOTSTRAPPED: '1',
+    },
+  })
+  if (child.error) throw child.error
+  if (child.signal) process.kill(process.pid, child.signal)
+  process.exit(child.status ?? 1)
+}
 
 const dispatch = {
   install: runInstall,
