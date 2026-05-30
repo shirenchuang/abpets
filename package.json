@@ -1,6 +1,6 @@
 {
   "name": "abpets",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Install desktop pets for AI coding agents — Claude Code, Codex, Cursor, GitHub Copilot, Cline, Gemini. One command extracts a pet's spritesheet into ~/.codex/pets and ~/.agentbro/pets so any AgentBro-hosted agent picks it up.",
   "type": "module",
   "bin": {

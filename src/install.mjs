@@ -130,8 +130,10 @@ export async function runInstall([ref]) {
     throw new Error(`pet "${handle}/${slug}" has no installable assets`)
   }
 
-  // Best-effort download counter ping; never fails the install.
-  apiPost(`/api/pets/${encodeURIComponent(handle)}/${encodeURIComponent(slug)}/download`, { source: 'cli' })
+  // Best-effort download counter ping. We await so the process doesn't exit
+  // before fetch actually goes out — but we swallow any error so install never
+  // fails on a flaky network or analytics outage.
+  await apiPost(`/api/pets/${encodeURIComponent(handle)}/${encodeURIComponent(slug)}/download`, { source: 'cli' })
     .catch(() => {})
 
   console.log(`${c.green('✓')} installed ${c.bold(pet.displayName)} (${c.dim(handle + '/' + slug)})`)
