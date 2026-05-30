@@ -3,7 +3,7 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
-export const DEFAULT_API = 'https://agentbro-pets-api-production.agentbro.workers.dev'
+export const DEFAULT_API = 'https://api.agentbro.net'
 export const API_BASE = (process.env.ABPETS_API || DEFAULT_API).replace(/\/$/, '')
 export const DEFAULT_WEB = 'https://www.agentbro.net'
 export const WEB_BASE = (process.env.ABPETS_WEB || DEFAULT_WEB).replace(/\/$/, '')
